@@ -10,10 +10,10 @@ docker-compose up -d
 docker-compose ps
 
 # 3. Run migrations
-go run cmd/migrate/main.go
+DATABASE_PORT=5433 go run cmd/migrate/main.go
 
 # 4. Start API
-go run cmd/api/main.go
+DATABASE_PORT=5433 go run cmd/api/main.go
 ```
 
 ## Quick Test Commands

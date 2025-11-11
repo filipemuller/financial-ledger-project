@@ -38,10 +38,10 @@ Response: {"amount": 100.50}
 docker-compose up -d
 
 # 2. Run migrations
-go run cmd/migrate/main.go
+DATABASE_PORT=5433 go run cmd/migrate/main.go
 
 # 3. Start API server
-go run cmd/api/main.go
+DATABASE_PORT=5433 go run cmd/api/main.go
 ```
 
 API runs at `http://localhost:8080`
