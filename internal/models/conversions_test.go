@@ -42,8 +42,8 @@ func TestFloatToCents(t *testing.T) {
 		{"Complex decimal", 123.45, 12345},
 		{"Single cent", 0.01, 1},
 		{"Large amount", 1234567.89, 123456789},
-		{"Precision handling", 100.123, 10012}, // Rounds to nearest cent
-		{"Precision handling 2", 100.126, 10013}, // Rounds to nearest cent
+		{"Precision handling", 100.123, 10012},
+		{"Precision handling 2", 100.126, 10013},
 	}
 
 	for _, tt := range tests {
