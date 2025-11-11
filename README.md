@@ -102,7 +102,7 @@ curl -X POST http://localhost:8080/transactions \
 **Error Codes:**
 - `400` - Invalid input
 - `404` - Account not found
-- `409` - Duplicate idempotency key or account already exists
+- `409` - Account already exists
 - `422` - Insufficient funds
 
 See [QUICKSTART.md](QUICKSTART.md) for detailed testing workflow.
