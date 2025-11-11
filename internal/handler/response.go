@@ -9,12 +9,10 @@ import (
 	"github.com/filipe/financial-ledger-project/internal/models"
 )
 
-// ErrorResponse represents an error response
 type ErrorResponse struct {
 	Error string `json:"error"`
 }
 
-// sendJSON sends a JSON response with the given status code
 func sendJSON(w http.ResponseWriter, statusCode int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
@@ -24,12 +22,10 @@ func sendJSON(w http.ResponseWriter, statusCode int, data interface{}) {
 	}
 }
 
-// sendError sends an error response with appropriate status code
 func sendError(w http.ResponseWriter, err error) {
 	statusCode := http.StatusInternalServerError
 	errorMessage := "Internal server error"
 
-	// Map domain errors to HTTP status codes
 	switch {
 	case errors.Is(err, models.ErrAccountNotFound):
 		statusCode = http.StatusNotFound
@@ -56,7 +52,6 @@ func sendError(w http.ResponseWriter, err error) {
 		statusCode = http.StatusConflict
 		errorMessage = "Duplicate idempotency key"
 	default:
-		// Log unexpected errors
 		log.Printf("Unexpected error: %v", err)
 	}
 

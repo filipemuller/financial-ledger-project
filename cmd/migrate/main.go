@@ -13,7 +13,6 @@ import (
 )
 
 func main() {
-	// Load configuration from environment
 	cfg := database.Config{
 		Host:     getEnv("DATABASE_HOST", "localhost"),
 		Port:     getEnv("DATABASE_PORT", "5432"),
@@ -23,7 +22,6 @@ func main() {
 		SSLMode:  getEnv("DATABASE_SSLMODE", "disable"),
 	}
 
-	// Connect to database
 	db, err := database.NewPostgresDB(cfg)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
@@ -32,7 +30,6 @@ func main() {
 
 	log.Println("Connected to database successfully")
 
-	// Run migrations
 	if err := runMigrations(db); err != nil {
 		log.Fatalf("Failed to run migrations: %v", err)
 	}
@@ -43,13 +40,11 @@ func main() {
 func runMigrations(db *sql.DB) error {
 	migrationsPath := "internal/database/migrations"
 
-	// Read all migration files
 	files, err := os.ReadDir(migrationsPath)
 	if err != nil {
 		return fmt.Errorf("failed to read migrations directory: %w", err)
 	}
 
-	// Sort files to ensure correct order
 	var sqlFiles []string
 	for _, file := range files {
 		if filepath.Ext(file.Name()) == ".sql" {
@@ -58,7 +53,6 @@ func runMigrations(db *sql.DB) error {
 	}
 	sort.Strings(sqlFiles)
 
-	// Execute each migration
 	for _, filename := range sqlFiles {
 		log.Printf("Running migration: %s", filename)
 

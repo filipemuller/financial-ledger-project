@@ -8,7 +8,6 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// Config holds database configuration
 type Config struct {
 	Host     string
 	Port     string
@@ -18,7 +17,6 @@ type Config struct {
 	SSLMode  string
 }
 
-// NewPostgresDB creates a new PostgreSQL connection pool
 func NewPostgresDB(cfg Config) (*sql.DB, error) {
 	dsn := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
@@ -30,13 +28,11 @@ func NewPostgresDB(cfg Config) (*sql.DB, error) {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
 
-	// Configure connection pool
 	db.SetMaxOpenConns(25)
 	db.SetMaxIdleConns(5)
 	db.SetConnMaxLifetime(5 * time.Minute)
 	db.SetConnMaxIdleTime(10 * time.Minute)
 
-	// Verify connection
 	if err := db.Ping(); err != nil {
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}

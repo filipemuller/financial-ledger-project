@@ -10,17 +10,14 @@ import (
 	"github.com/lib/pq"
 )
 
-// TransactionRepository handles transaction database operations
 type TransactionRepository struct {
 	db *sql.DB
 }
 
-// NewTransactionRepository creates a new transaction repository
 func NewTransactionRepository(db *sql.DB) *TransactionRepository {
 	return &TransactionRepository{db: db}
 }
 
-// Create inserts a new transaction record within a database transaction
 func (r *TransactionRepository) Create(ctx context.Context, tx *sql.Tx, transaction *models.Transaction) error {
 	query := `
 		INSERT INTO transactions (id, source_account_id, destination_account_id, amount, status, idempotency_key, created_at)
@@ -39,7 +36,6 @@ func (r *TransactionRepository) Create(ctx context.Context, tx *sql.Tx, transact
 	)
 
 	if err != nil {
-		// Check for unique constraint violation on idempotency key
 		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
 			return models.ErrDuplicateIdempotency
 		}
@@ -49,7 +45,6 @@ func (r *TransactionRepository) Create(ctx context.Context, tx *sql.Tx, transact
 	return nil
 }
 
-// GetByIdempotencyKey retrieves a transaction by its idempotency key
 func (r *TransactionRepository) GetByIdempotencyKey(ctx context.Context, key string) (*models.Transaction, error) {
 	query := `
 		SELECT id, source_account_id, destination_account_id, amount, status, idempotency_key, created_at
