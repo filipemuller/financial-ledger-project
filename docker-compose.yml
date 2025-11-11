@@ -6,6 +6,8 @@ services:
       POSTGRES_DB: financial_ledger
       POSTGRES_USER: ledger_user
       POSTGRES_PASSWORD: ledger_pass
+      TZ: America/Campo_Grande
+      PGTZ: America/Campo_Grande
     ports:
       - "5433:5432"
     volumes:

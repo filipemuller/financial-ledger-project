@@ -82,7 +82,22 @@ curl -X POST http://localhost:8080/transactions \
 ```
 Returns: `{"transaction_id": "...", "status": "COMPLETED", ...}`
 
-**Idempotency:** Using the same `Idempotency-Key` in multiple requests returns the original transaction without re-executing the transfer.
+**Idempotency:** Using the same `Idempotency-Key` in multiple requests returns the original transaction without re-executing the transfer. This happens **even if the request body is different** - the system ignores the new request data and returns the cached result from the first request with that key.
+
+Example:
+```bash
+# First request with key "abc-123" - transfers 250.25
+curl -X POST http://localhost:8080/transactions \
+  -H "Idempotency-Key: abc-123" \
+  -d '{"source_account_id": 1, "destination_account_id": 2, "amount": 250.25}'
+# Returns: transaction with amount 250.25
+
+# Second request with SAME key but DIFFERENT amount - returns original transaction
+curl -X POST http://localhost:8080/transactions \
+  -H "Idempotency-Key: abc-123" \
+  -d '{"source_account_id": 1, "destination_account_id": 2, "amount": 999999.99}'
+# Returns: SAME transaction with amount 250.25 (no new transfer created)
+```
 
 **Error Codes:**
 - `400` - Invalid input
