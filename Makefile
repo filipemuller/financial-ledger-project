@@ -1,5 +1,8 @@
 .PHONY: help setup start stop clean migrate test test-unit test-integration test-coverage run build
 
+include .env
+export
+
 help: ## Show this help message
 	@echo 'Usage: make [target]'
 	@echo ''
