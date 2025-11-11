@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/http/httptest"
 	"sync"
 	"sync/atomic"
@@ -20,7 +21,6 @@ func TestConcurrentTransfers_BalanceConsistency(t *testing.T) {
 	router, cleanup := setupTestRouter(t)
 	defer cleanup()
 
-	// Create 3 accounts with $10,000 each
 	initialBalance := 10000.00
 	totalSystemBalance := initialBalance * 3.0
 
@@ -33,7 +33,6 @@ func TestConcurrentTransfers_BalanceConsistency(t *testing.T) {
 		require.Equal(t, http.StatusCreated, w.Code)
 	}
 
-	// Launch 100 concurrent transfers
 	var wg sync.WaitGroup
 	numGoroutines := 100
 	transferAmount := 10.00
@@ -43,7 +42,6 @@ func TestConcurrentTransfers_BalanceConsistency(t *testing.T) {
 		go func(i int) {
 			defer wg.Done()
 
-			// Random transfers between accounts
 			source := (i % 3) + 1
 			dest := ((i + 1) % 3) + 1
 
@@ -57,13 +55,11 @@ func TestConcurrentTransfers_BalanceConsistency(t *testing.T) {
 			req.Header.Set("Content-Type", "application/json")
 			w := httptest.NewRecorder()
 			router.ServeHTTP(w, req)
-			// Some may succeed, some may fail due to timing - both are OK
 		}(i)
 	}
 
 	wg.Wait()
 
-	// CRITICAL TEST: Total balance must still be $30,000
 	totalBalance := 0.0
 	for i := 1; i <= 3; i++ {
 		req := httptest.NewRequest("GET", fmt.Sprintf("/accounts/%d", i), nil)
@@ -85,7 +81,6 @@ func TestConcurrentTransfers_FromSameAccount(t *testing.T) {
 	router, cleanup := setupTestRouter(t)
 	defer cleanup()
 
-	// Create accounts
 	accounts := []string{
 		`{"account_id": 1, "initial_balance": 1000.00}`,
 		`{"account_id": 2, "initial_balance": 0.00}`,
@@ -99,7 +94,6 @@ func TestConcurrentTransfers_FromSameAccount(t *testing.T) {
 		require.Equal(t, http.StatusCreated, w.Code)
 	}
 
-	// Launch 50 concurrent transfers of $25 each from account 1
 	var wg sync.WaitGroup
 	successCount := int32(0)
 	transferAmount := 25.00
@@ -129,11 +123,9 @@ func TestConcurrentTransfers_FromSameAccount(t *testing.T) {
 
 	wg.Wait()
 
-	// Should have exactly 40 successful transfers (1000 / 25 = 40)
 	assert.Equal(t, int32(40), successCount,
 		"Expected exactly 40 successful transfers")
 
-	// Verify balances
 	req := httptest.NewRequest("GET", "/accounts/1", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -155,7 +147,6 @@ func TestConcurrentTransfers_WithIdempotency(t *testing.T) {
 	router, cleanup := setupTestRouter(t)
 	defer cleanup()
 
-	// Create accounts
 	accounts := []string{
 		`{"account_id": 1, "initial_balance": 1000.00}`,
 		`{"account_id": 2, "initial_balance": 500.00}`,
@@ -169,7 +160,6 @@ func TestConcurrentTransfers_WithIdempotency(t *testing.T) {
 		require.Equal(t, http.StatusCreated, w.Code)
 	}
 
-	// Launch 10 concurrent requests with SAME idempotency key
 	var wg sync.WaitGroup
 	numGoroutines := 10
 	idempotencyKey := "unique-key-concurrent-test"
@@ -207,14 +197,12 @@ func TestConcurrentTransfers_WithIdempotency(t *testing.T) {
 
 	wg.Wait()
 
-	// All requests should return the same transaction ID
 	require.NotEmpty(t, transactionIDs, "Should have at least one transaction ID")
 	firstID := transactionIDs[0]
 	for _, id := range transactionIDs {
 		assert.Equal(t, firstID, id, "All requests should return same transaction ID")
 	}
 
-	// Verify balance was only deducted once
 	req := httptest.NewRequest("GET", "/accounts/1", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -229,7 +217,6 @@ func TestConcurrentCreates_DuplicateAccount(t *testing.T) {
 	router, cleanup := setupTestRouter(t)
 	defer cleanup()
 
-	// Try to create the same account concurrently
 	var wg sync.WaitGroup
 	numGoroutines := 10
 	successCount := int32(0)
@@ -253,7 +240,6 @@ func TestConcurrentCreates_DuplicateAccount(t *testing.T) {
 
 	wg.Wait()
 
-	// Only one should succeed
 	assert.Equal(t, int32(1), successCount,
 		"Only one account creation should succeed")
 }
