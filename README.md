@@ -158,11 +158,11 @@ Transfers acquire locks on both accounts to prevent race conditions:
 
 ```sql
 BEGIN;
-SELECT * FROM accounts WHERE id = 1 FOR UPDATE;  -- Locks account 1
-SELECT * FROM accounts WHERE id = 2 FOR UPDATE;  -- Locks account 2
+SELECT * FROM accounts WHERE id = 1 FOR UPDATE;
+SELECT * FROM accounts WHERE id = 2 FOR UPDATE; 
 UPDATE accounts SET balance = balance - 10050 WHERE id = 1;
 UPDATE accounts SET balance = balance + 10050 WHERE id = 2;
-COMMIT;  -- Both updates or neither
+COMMIT;
 ```
 
 This ensures no money is lost or created, even under high concurrency.
@@ -186,10 +186,6 @@ This system was designed and implemented with AI assistance (Claude):
 - **System design** - Layered architecture, cents-based storage approach, and concurrency strategy
 - **Database migrations** - Schema design with appropriate constraints and indexes
 - **Test coverage** - Comprehensive test suite including edge cases and concurrency scenarios
-- **Implementation** - Clean, production-ready Go code following best practices
+- **Documentation** - Clean, detailed and precise documentation created to resume the work
 
 The AI helped accelerate development while ensuring financial accuracy and data consistency were prioritized throughout.
-
-## License
-
-MIT License
