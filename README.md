@@ -27,7 +27,7 @@ Database: UPDATE accounts SET balance = balance - 10050
 Response: {"amount": 100.50}
 ```
 
-**Why cents?** Floating-point arithmetic is imprecise (`0.1 + 0.2 = 0.30000000000000004`). Storing as integers guarantees exact calculations.
+**Why cents?** Floating-point arithmetic is imprecise, so storing as integers guarantees exact calculations, which is something really important for financial systems.
 
 ## Quick Start
 
