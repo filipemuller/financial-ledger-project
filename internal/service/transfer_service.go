@@ -58,7 +58,6 @@ func (s *TransferService) Transfer(
 	}
 	defer tx.Rollback()
 
-	// Lock accounts in consistent order (by ID) to prevent deadlocks
 	var sourceAccount, destAccount *models.Account
 	if req.SourceAccountID < req.DestinationAccountID {
 		sourceAccount, err = s.accountRepo.GetForUpdate(ctx, tx, req.SourceAccountID)
