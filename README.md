@@ -198,7 +198,7 @@ Network failures can cause clients to retry requests. Without idempotency, a tra
 
 This system was designed and implemented with AI assistance (Claude):
 
-- **System design** - Layered architecture, cents-based storage approach, and concurrency strategy
+- **System design** - Layered architecture, and concurrency strategy
 - **Database migrations** - Schema design with appropriate constraints and indexes
 - **Test coverage** - Comprehensive test suite including edge cases and concurrency scenarios
 - **Documentation** - Clean, detailed and precise documentation created to resume the work
