@@ -58,14 +58,26 @@ func (s *TransferService) Transfer(
 	}
 	defer tx.Rollback()
 
-	sourceAccount, err := s.accountRepo.GetForUpdate(ctx, tx, req.SourceAccountID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get source account: %w", err)
-	}
-
-	destAccount, err := s.accountRepo.GetForUpdate(ctx, tx, req.DestinationAccountID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get destination account: %w", err)
+	// Lock accounts in consistent order (by ID) to prevent deadlocks
+	var sourceAccount, destAccount *models.Account
+	if req.SourceAccountID < req.DestinationAccountID {
+		sourceAccount, err = s.accountRepo.GetForUpdate(ctx, tx, req.SourceAccountID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get source account: %w", err)
+		}
+		destAccount, err = s.accountRepo.GetForUpdate(ctx, tx, req.DestinationAccountID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get destination account: %w", err)
+		}
+	} else {
+		destAccount, err = s.accountRepo.GetForUpdate(ctx, tx, req.DestinationAccountID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get destination account: %w", err)
+		}
+		sourceAccount, err = s.accountRepo.GetForUpdate(ctx, tx, req.SourceAccountID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get source account: %w", err)
+		}
 	}
 
 	if sourceAccount.Balance < amountInCents {
