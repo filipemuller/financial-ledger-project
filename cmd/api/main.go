@@ -18,7 +18,6 @@ import (
 )
 
 func main() {
-	// Load configuration from environment
 	cfg := database.Config{
 		Host:     getEnv("DATABASE_HOST", "localhost"),
 		Port:     getEnv("DATABASE_PORT", "5432"),
@@ -30,7 +29,6 @@ func main() {
 
 	port := getEnv("API_PORT", "8080")
 
-	// Connect to database
 	db, err := database.NewPostgresDB(cfg)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
@@ -39,35 +37,28 @@ func main() {
 
 	log.Println("Connected to database successfully")
 
-	// Initialize repositories
 	accountRepo := repository.NewAccountRepository(db)
 	transactionRepo := repository.NewTransactionRepository(db)
 
-	// Initialize services
 	accountService := service.NewAccountService(accountRepo)
 	transferService := service.NewTransferService(db, accountRepo, transactionRepo)
 
-	// Initialize handlers
 	accountHandler := handler.NewAccountHandler(accountService)
 	transactionHandler := handler.NewTransactionHandler(transferService)
 
-	// Setup router
 	r := chi.NewRouter()
 
-	// Middleware
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Timeout(60 * time.Second))
 
-	// Health check
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))
 	})
 
-	// API routes
 	r.Route("/accounts", func(r chi.Router) {
 		r.Post("/", accountHandler.CreateAccount)
 		r.Get("/{account_id}", accountHandler.GetAccount)
@@ -77,7 +68,6 @@ func main() {
 		r.Post("/", transactionHandler.CreateTransaction)
 	})
 
-	// Setup server
 	srv := &http.Server{
 		Addr:         ":" + port,
 		Handler:      r,
@@ -86,7 +76,6 @@ func main() {
 		IdleTimeout:  60 * time.Second,
 	}
 
-	// Start server in a goroutine
 	go func() {
 		log.Printf("Starting API server on port %s...", port)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -94,14 +83,12 @@ func main() {
 		}
 	}()
 
-	// Wait for interrupt signal to gracefully shutdown the server
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
 	log.Println("Shutting down server...")
 
-	// Graceful shutdown with 5 second timeout
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
