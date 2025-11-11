@@ -20,8 +20,8 @@ func NewAccountRepository(db *sql.DB) *AccountRepository {
 
 func (r *AccountRepository) Create(ctx context.Context, account *models.Account) error {
 	query := `
-		INSERT INTO accounts (id, balance, created_at, updated_at)
-		VALUES ($1, $2, NOW(), NOW())
+		INSERT INTO accounts (id, balance, created_at)
+		VALUES ($1, $2, NOW())
 	`
 
 	_, err := r.db.ExecContext(ctx, query, account.ID, account.Balance)

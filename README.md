@@ -4,7 +4,7 @@ An internal transfers system built with Go and PostgreSQL. Provides three core e
 
 ## Key Features
 
-- **Precise Money Handling** - Stores amounts as cents (integers) to avoid floating-point errors
+- **Precise Money Handling** - Stores amounts as cents (integers) to avoid floating-point errors. The smallest unit handled is 1 cent (0.01).
 - **Strong Consistency** - Database transactions with row-level locking prevent race conditions
 - **Idempotency** - Optional keys prevent duplicate transfers on network retries
 - **Comprehensive Testing** - Unit, integration, and concurrency tests included
@@ -80,7 +80,7 @@ curl -X POST http://localhost:8080/transactions \
     "amount": 250.25
   }'
 ```
-Returns: `{"transaction_id": "...", "status": "completed", ...}`
+Returns: `{"transaction_id": "...", "status": "COMPLETED", ...}`
 
 **Idempotency:** Using the same `Idempotency-Key` in multiple requests returns the original transaction without re-executing the transfer.
 

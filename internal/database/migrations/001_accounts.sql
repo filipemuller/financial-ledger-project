@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS accounts (
     id BIGINT PRIMARY KEY,
-    balance BIGINT NOT NULL DEFAULT 0,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    balance BIGINT NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP,
     CONSTRAINT positive_balance CHECK (balance >= 0)
 );
 

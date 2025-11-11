@@ -157,7 +157,7 @@ func TestAPI_Transfer(t *testing.T) {
 	assert.Equal(t, int64(1), txnResponse.SourceAccountID)
 	assert.Equal(t, int64(2), txnResponse.DestinationAccountID)
 	assert.Equal(t, 250.50, txnResponse.Amount)
-	assert.Equal(t, "completed", txnResponse.Status)
+	assert.Equal(t, "COMPLETED", txnResponse.Status)
 
 	getReq := httptest.NewRequest("GET", "/accounts/1", nil)
 	w = httptest.NewRecorder()

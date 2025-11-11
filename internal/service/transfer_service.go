@@ -93,7 +93,7 @@ func (s *TransferService) Transfer(
 		SourceAccountID:      req.SourceAccountID,
 		DestinationAccountID: req.DestinationAccountID,
 		Amount:               amountInCents,
-		Status:               "completed",
+		Status:               "COMPLETED",
 		IdempotencyKey:       idempotencyKeyPtr,
 	}
 
