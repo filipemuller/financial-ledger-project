@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: financial-ledger-db
+    environment:
+      POSTGRES_DB: financial_ledger
+      POSTGRES_USER: ledger_user
+      POSTGRES_PASSWORD: ledger_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ledger_user -d financial_ledger"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ledger-network
+
+volumes:
+  postgres_data:
+
+networks:
+  ledger-network:
+    driver: bridge
