@@ -21,7 +21,7 @@ import (
 func setupTestRouter(t *testing.T) (*chi.Mux, func()) {
 	cfg := database.Config{
 		Host:     "localhost",
-		Port:     "5432",
+		Port:     "5433",
 		User:     "ledger_user",
 		Password: "ledger_pass",
 		DBName:   "financial_ledger",
