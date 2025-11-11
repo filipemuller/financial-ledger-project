@@ -83,13 +83,6 @@ go test -v ./tests/integration/...
 go test -v -race ./tests/integration/concurrency_test.go ./tests/integration/api_test.go
 ```
 
-## Project Stats
-
-- **Production Code**: ~970 lines
-- **Test Code**: ~750 lines
-- **Test Coverage**: Comprehensive (unit + integration + concurrency)
-- **Architecture**: Clean layered design (Handler → Service → Repository → DB)
-
 ## Key Implementation Points
 
 ✅ Amounts stored as `BIGINT` (cents) in database - smallest unit is 1 cent (0.01)
