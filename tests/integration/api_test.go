@@ -2,9 +2,7 @@ package integration
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -21,7 +19,6 @@ import (
 
 // setupTestRouter creates a test router with all dependencies
 func setupTestRouter(t *testing.T) (*chi.Mux, func()) {
-	// Connect to test database
 	cfg := database.Config{
 		Host:     "localhost",
 		Port:     "5432",
@@ -34,23 +31,18 @@ func setupTestRouter(t *testing.T) (*chi.Mux, func()) {
 	db, err := database.NewPostgresDB(cfg)
 	require.NoError(t, err, "Failed to connect to test database")
 
-	// Clean up database before each test
 	_, err = db.Exec("TRUNCATE accounts, transactions CASCADE")
 	require.NoError(t, err, "Failed to truncate tables")
 
-	// Initialize repositories
 	accountRepo := repository.NewAccountRepository(db)
 	transactionRepo := repository.NewTransactionRepository(db)
 
-	// Initialize services
 	accountService := service.NewAccountService(accountRepo)
 	transferService := service.NewTransferService(db, accountRepo, transactionRepo)
 
-	// Initialize handlers
 	accountHandler := handler.NewAccountHandler(accountService)
 	transactionHandler := handler.NewTransactionHandler(transferService)
 
-	// Setup router
 	r := chi.NewRouter()
 	r.Post("/accounts", accountHandler.CreateAccount)
 	r.Get("/accounts/{account_id}", accountHandler.GetAccount)
@@ -106,7 +98,6 @@ func TestAPI_GetAccount(t *testing.T) {
 	router, cleanup := setupTestRouter(t)
 	defer cleanup()
 
-	// Create an account first
 	createReq := httptest.NewRequest("POST", "/accounts",
 		bytes.NewBufferString(`{"account_id": 1, "initial_balance": 100.50}`))
 	createReq.Header.Set("Content-Type", "application/json")
@@ -114,7 +105,6 @@ func TestAPI_GetAccount(t *testing.T) {
 	router.ServeHTTP(w, createReq)
 	require.Equal(t, http.StatusCreated, w.Code)
 
-	// Test getting the account
 	getReq := httptest.NewRequest("GET", "/accounts/1", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, getReq)
@@ -133,7 +123,6 @@ func TestAPI_Transfer(t *testing.T) {
 	router, cleanup := setupTestRouter(t)
 	defer cleanup()
 
-	// Create two accounts
 	accounts := []string{
 		`{"account_id": 1, "initial_balance": 1000.00}`,
 		`{"account_id": 2, "initial_balance": 500.00}`,
@@ -147,7 +136,6 @@ func TestAPI_Transfer(t *testing.T) {
 		require.Equal(t, http.StatusCreated, w.Code)
 	}
 
-	// Test transfer
 	transferBody := `{
 		"source_account_id": 1,
 		"destination_account_id": 2,
@@ -171,7 +159,6 @@ func TestAPI_Transfer(t *testing.T) {
 	assert.Equal(t, 250.50, txnResponse.Amount)
 	assert.Equal(t, "completed", txnResponse.Status)
 
-	// Verify balances
 	getReq := httptest.NewRequest("GET", "/accounts/1", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, getReq)
@@ -191,7 +178,6 @@ func TestAPI_InsufficientFunds(t *testing.T) {
 	router, cleanup := setupTestRouter(t)
 	defer cleanup()
 
-	// Create accounts
 	req := httptest.NewRequest("POST", "/accounts",
 		bytes.NewBufferString(`{"account_id": 1, "initial_balance": 50.00}`))
 	req.Header.Set("Content-Type", "application/json")
@@ -204,7 +190,6 @@ func TestAPI_InsufficientFunds(t *testing.T) {
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
-	// Try to transfer more than available
 	transferBody := `{
 		"source_account_id": 1,
 		"destination_account_id": 2,
@@ -223,7 +208,6 @@ func TestAPI_Idempotency(t *testing.T) {
 	router, cleanup := setupTestRouter(t)
 	defer cleanup()
 
-	// Create accounts
 	accounts := []string{
 		`{"account_id": 1, "initial_balance": 1000.00}`,
 		`{"account_id": 2, "initial_balance": 500.00}`,
@@ -244,7 +228,6 @@ func TestAPI_Idempotency(t *testing.T) {
 
 	idempotencyKey := "test-key-123"
 
-	// First request
 	req1 := httptest.NewRequest("POST", "/transactions", bytes.NewBufferString(transferBody))
 	req1.Header.Set("Content-Type", "application/json")
 	req1.Header.Set("Idempotency-Key", idempotencyKey)
@@ -256,7 +239,6 @@ func TestAPI_Idempotency(t *testing.T) {
 	var txn1 models.TransactionResponse
 	json.NewDecoder(w1.Body).Decode(&txn1)
 
-	// Second request with same key
 	req2 := httptest.NewRequest("POST", "/transactions", bytes.NewBufferString(transferBody))
 	req2.Header.Set("Content-Type", "application/json")
 	req2.Header.Set("Idempotency-Key", idempotencyKey)
@@ -268,10 +250,8 @@ func TestAPI_Idempotency(t *testing.T) {
 	var txn2 models.TransactionResponse
 	json.NewDecoder(w2.Body).Decode(&txn2)
 
-	// Should return same transaction
 	assert.Equal(t, txn1.TransactionID, txn2.TransactionID)
 
-	// Verify balance only deducted once
 	getReq := httptest.NewRequest("GET", "/accounts/1", nil)
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, getReq)
