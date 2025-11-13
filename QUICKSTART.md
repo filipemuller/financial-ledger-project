@@ -83,17 +83,6 @@ go test -v ./tests/integration/...
 go test -v -race ./tests/integration/concurrency_test.go ./tests/integration/api_test.go
 ```
 
-## Key Implementation Points
-
-✅ Amounts stored as `BIGINT` (cents) in database - smallest unit is 1 cent (0.01)
-✅ Amounts exposed as `float64` in API responses
-✅ Row-level locking with `SELECT FOR UPDATE`
-✅ Database transactions for atomicity
-✅ Idempotency support with unique keys
-✅ Comprehensive error handling
-✅ Concurrency-safe transfers
-✅ Full test suite included
-
 ## Database Access
 
 ```bash
